@@ -16,6 +16,7 @@ class KnapsackState;
 
 class KnapsackInstance {
     int id, capacity;
+    double coolingFactor;
     vector<KnapsackItem *> *items;
     ofstream *costsFile;
 
@@ -32,6 +33,7 @@ public:
     vector<KnapsackItem *> * getItems() const;
     void solve();
     int getCapacity() const;
+    void setCoolingFactor(double coolingFactor);
 };
 
 

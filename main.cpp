@@ -15,10 +15,14 @@ int main() {
     }
     string line;
     while (getline(file, line)) {
-        KnapsackInstance instance;
-        istringstream iss(line);
-        iss >> instance;
-        instance.solve();
+        for (double coolingFactor = 0.800; coolingFactor < 1.0; coolingFactor += 0.001) {
+            KnapsackInstance instance;
+            instance.setCoolingFactor(coolingFactor);
+            istringstream iss(line);
+            iss >> instance;
+            instance.solve();
+        }
+        break;
     }
     file.close();
     return EXIT_SUCCESS;

@@ -11,6 +11,7 @@
 KnapsackInstance::KnapsackInstance() {
     id = 0;
     capacity = 0;
+    coolingFactor = 0.0;
     items = new vector<KnapsackItem *>();
 }
 
@@ -59,6 +60,7 @@ ostream &operator << (ostream &out, KnapsackInstance &instance) {
 void KnapsackInstance::solve() {
     cerr << "-----------------------------------" << endl;
     cerr << "Starting to solve instance: " << *this << endl;
+    cerr << "Using cooling factor: " << coolingFactor << endl;
 
     KnapsackState state(this);
     KnapsackState best(this);
@@ -74,15 +76,21 @@ void KnapsackInstance::solve() {
 
     cerr << "Found starting temperature: " << temp << endl;
 
+    clock_t tt1 = clock();
+
     do {
         evalState(state, best, temp, accepted, processed, false);
-        temp *= COOLING_FACTOR;
+        temp *= coolingFactor;
     } while (!isFrozen(accepted, processed));
+
+    clock_t tt2 = clock();
 
     cerr << "Finished solving instance with id " << id << endl;
     cerr << "----------------------------------------------------" << endl;
 
     cout << "Best solution found: " << best << endl;
+    cout << coolingFactor << " " << ((double) tt2 - tt1) / (CLOCKS_PER_SEC / 1000) << endl;
+    cout << coolingFactor << " " << ((double) 4068 - best.getCost()) / 4068 << endl;
 }
 
 void KnapsackInstance::evalState(KnapsackState &state, KnapsackState &best, double temp, int &accepted, int &processed, bool simulation) const {
@@ -158,4 +166,8 @@ vector<KnapsackItem *> *KnapsackInstance::getItems() const {
 
 int KnapsackInstance::getCapacity() const {
     return capacity;
+}
+
+void KnapsackInstance::setCoolingFactor(double coolingFactor) {
+    KnapsackInstance::coolingFactor = coolingFactor;
 }
