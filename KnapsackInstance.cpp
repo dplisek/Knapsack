@@ -50,48 +50,99 @@ void KnapsackInstance::solve() {
     cerr << "Starting to solve instance: " << *this << endl;
 
     KnapsackState state(this);
+    KnapsackState best(this);
     state.randomize();
-    while (state.getWeight() > capacity) {
-        cerr << "Too heavy, regenerating initial state." << endl;
-        state.randomize();
-    }
     cerr << "Initial state: " << state << endl << endl;
 
-    double temp = START_TEMP;
-    while (temp > FINAL_TEMP) {
-        cerr << "Temperature set to: " << temp << endl;
-        for (int i = 0; i < EQUI_LEN; ++i) {
-            cerr << "Inner loop: " << i << endl;
-            double costInv = 1.0 / state.getCost();
-            int index = (int) (rand() % items->size());
-            state.transitionAtIndex(index);
-            cerr << "Evaluating neighbor at " << index << ": " << state << endl;
-            if (state.getWeight() > capacity) {
-                cerr << "This state is too heavy, reverting and skipping." << endl;
-                state.transitionAtIndex(index);
-                cerr << "----" << endl;
-                continue;
-            }
-            double diff = (1.0 / state.getCost()) - costInv;
-            cerr << "Diff: " << diff << endl;
-            double randFloat = ((double) rand()) / RAND_MAX;
-            cerr << "Random: " << randFloat << endl;
-            if (diff < 0 || randFloat < exp(-diff / temp)) {
-                cerr << "Sticking to transition." << endl;
-                cout << 1.0 / state.getCost() << endl;
-            } else {
-                state.transitionAtIndex(index);
-                cerr << "Reverted back to: " << state << endl;
-            }
-            cerr << "----" << endl;
-        }
+    int accepted, processed;
+    double temp = 0.0000000001;
+    do {
+        temp *= WARMING_FACTOR;
+        evalState(state, best, temp, accepted, processed, true);
+    } while (!acceptingEnough(accepted, processed));
+
+    cerr << "Found starting temperature: " << temp << endl;
+
+    do {
+        evalState(state, best, temp, accepted, processed, false);
         temp *= COOLING_FACTOR;
-    }
+    } while (!isFrozen(accepted, processed));
 
     cerr << "Finished solving instance with id " << id << endl;
     cerr << "----------------------------------------------------" << endl;
 }
 
+void KnapsackInstance::evalState(KnapsackState &state, KnapsackState &best, double temp, int &accepted, int &processed, bool simulation) const {
+    cerr << "-------------------------" << endl << "Temperature set to: " << temp << endl << "-------------------------" << endl ;
+    accepted = 0;
+    processed = 0;
+    while (processed < items->size() * 2 && accepted < items->size()) {
+        double origValue = getValueToOptimize(state);
+        int index = (int) (rand() % items->size());
+        state.transitionAtIndex(index);
+        cerr << "Evaluating neighbor at " << index << ": " << state << endl;
+        double diff = getValueToOptimize(state) - origValue;
+        cerr << "Diff: " << diff << endl;
+        double randFloat = ((double) rand()) / RAND_MAX;
+        cerr << "Random: " << randFloat << endl;
+        if (state.getWeight() > capacity) {
+            cerr << "State too heavy." << endl;
+            revert(state, index);
+        } else if (diff > 0 && randFloat > exp(-diff / temp)) {
+            cerr << "State worse by too much." << endl;
+            ++processed;
+            revert(state, index);
+        } else {
+            cerr << "Sticking to transition." << endl;
+            if (simulation) {
+                if (diff > 0) {
+                    ++processed;
+                    ++accepted;
+                }
+            } else {
+                ++processed;
+                ++accepted;
+                cout << getValueToOptimize(state) << endl;
+                if (getValueToOptimize(state) < getValueToOptimize(best)) {
+                    best.copyOf(state);
+                    cerr << "Found new best result: " << best << endl;
+                }
+            }
+        }
+        cerr << "----" << endl;
+    }
+}
+
+void KnapsackInstance::revert(KnapsackState &state, int index) const {
+    state.transitionAtIndex(index);
+    cerr << "Reverted transition." << endl;
+}
+
+double KnapsackInstance::getValueToOptimize(const KnapsackState &state) const {
+    return 1.0 / state.getCost();
+//    if (state.getWeight() > capacity) {
+//        base += (((double) (state.getWeight() - capacity)) / capacity) * base;
+//    }
+//    return base;
+}
+
+bool KnapsackInstance::acceptingEnough(int accepted, int processed) const {
+    double ratio = ((double) accepted) / processed;
+    cerr << "Accepted: " << accepted << ", Processed: " << processed << ", ratio: " << ratio << endl;
+    return ratio > 0.5;
+}
+
+bool KnapsackInstance::isFrozen(int accepted, int processed) const {
+    double ratio = ((double) accepted) / processed;
+    cerr << "Accepted: " << accepted << ", Processed: " << processed << ", ratio: " << ratio << endl;
+    return ratio < 0.05;
+}
+
 vector<KnapsackItem *> *KnapsackInstance::getItems() const {
     return items;
+}
+
+
+int KnapsackInstance::getCapacity() const {
+    return capacity;
 }

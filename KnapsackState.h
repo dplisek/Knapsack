@@ -26,6 +26,7 @@ public:
 
     void transitionAtIndex(int index);
 
+    void copyOf(KnapsackState &state);
 
     int getWeight() const;
 

@@ -19,8 +19,9 @@ void KnapsackState::randomize() {
     weight = cost = 0;
     int i = 0;
     for (KnapsackItem *item : *instance->getItems()) {
-        itemPresenceVector[i] = rand() % 2;
-        if (itemPresenceVector[i]) {
+        bool include = (bool) (rand() % 2);
+        if (include && weight + item->getWeight() <= instance->getCapacity()) {
+            itemPresenceVector[i] = 1;
             weight += item->getWeight();
             cost += item->getCost();
         }
@@ -58,4 +59,12 @@ int KnapsackState::getWeight() const {
 
 int KnapsackState::getCost() const {
     return cost;
+}
+
+void KnapsackState::copyOf(KnapsackState &state) {
+    weight = state.weight;
+    cost = state.cost;
+    for (int i = 0; i < instance->getItems()->size(); ++i) {
+        itemPresenceVector[i] = state.itemPresenceVector[i];
+    }
 }

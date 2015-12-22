@@ -19,6 +19,7 @@ int main() {
         istringstream iss(line);
         iss >> instance;
         instance.solve();
+        break;
     }
     file.close();
     return EXIT_SUCCESS;
