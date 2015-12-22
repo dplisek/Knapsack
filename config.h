@@ -1,0 +1,13 @@
+//
+// Created by dominik on 12/22/15.
+//
+
+#ifndef SIMULATEDANNEALING_CONFIG_H
+#define SIMULATEDANNEALING_CONFIG_H
+
+#define START_TEMP 0.1
+#define FINAL_TEMP 0.001
+#define EQUI_LEN 40
+#define COOLING_FACTOR 0.95
+
+#endif //SIMULATEDANNEALING_CONFIG_H
