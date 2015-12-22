@@ -81,6 +81,8 @@ void KnapsackInstance::solve() {
 
     cerr << "Finished solving instance with id " << id << endl;
     cerr << "----------------------------------------------------" << endl;
+
+    cout << "Best solution found: " << best << endl;
 }
 
 void KnapsackInstance::evalState(KnapsackState &state, KnapsackState &best, double temp, int &accepted, int &processed, bool simulation) const {
