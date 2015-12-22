@@ -8,6 +8,7 @@
 #include "KnapsackItem.h"
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -16,6 +17,8 @@ class KnapsackState;
 class KnapsackInstance {
     int id, capacity;
     vector<KnapsackItem *> *items;
+    ofstream *costsFile;
+
     bool isFrozen(int accepted, int processed) const;
     double getValueToOptimize(const KnapsackState &state) const;
     void revert(KnapsackState &state, int index) const;

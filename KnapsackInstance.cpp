@@ -19,6 +19,10 @@ KnapsackInstance::~KnapsackInstance() {
         delete item;
     }
     delete items;
+    if (costsFile) {
+        costsFile->close();
+        delete costsFile;
+    }
 }
 
 istream &operator >> (istream &in, KnapsackInstance &instance) {
@@ -34,6 +38,13 @@ istream &operator >> (istream &in, KnapsackInstance &instance) {
             exit(EXIT_FAILURE);
         }
         instance.items->push_back(new KnapsackItem(weight, cost));
+    }
+    stringstream sstm;
+    sstm << "/home/dominik/ClionProjects/SimulatedAnnealing/data/costs." << instance.id << ".dat";
+    instance.costsFile = new ofstream(sstm.str());
+    if (!instance.costsFile->is_open()) {
+        cerr << "Couldn't open costs file for instance " << instance.id << endl;
+        exit(EXIT_FAILURE);
     }
     return in;
 }
@@ -102,7 +113,7 @@ void KnapsackInstance::evalState(KnapsackState &state, KnapsackState &best, doub
             } else {
                 ++processed;
                 ++accepted;
-                cout << getValueToOptimize(state) << endl;
+                *costsFile << getValueToOptimize(state) << endl;
                 if (getValueToOptimize(state) < getValueToOptimize(best)) {
                     best.copyOf(state);
                     cerr << "Found new best result: " << best << endl;

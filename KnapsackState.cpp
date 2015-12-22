@@ -9,6 +9,9 @@
 KnapsackState::KnapsackState(KnapsackInstance *instance) : instance(instance) {
     weight = cost = 0;
     itemPresenceVector = new int[instance->getItems()->size()];
+    for (int i = 0; i < instance->getItems()->size(); ++i) {
+        itemPresenceVector[i] = 0;
+    }
 }
 
 KnapsackState::~KnapsackState() {
